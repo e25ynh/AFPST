@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เช็คชื่อ อวท. ระดับภาค</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1b2430; --mut:#667085; --line:#e4e7ec; --bg:#f4f6fa; --brand:#1d4ed8; --ok:#16a34a; --warn:#d97706; --bad:#dc2626; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Sarabun','Noto Sans Thai',system-ui,sans-serif; color:var(--ink); background:var(--bg); }
+  [hidden] { display:none !important; }
+
+  /* หน้าแรก / ตั้งค่าไม่ครบ */
+  .v-h { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .v-h .card { width:min(480px,100%); background:#fff; border-radius:20px; padding:28px 22px; box-shadow:0 4px 18px rgba(16,24,40,.08); text-align:center; }
+  .v-h h1 { font-size:24px; margin:0 0 6px; } .v-h p { color:var(--mut); margin:0 0 18px; }
+  .v-h a.btn { display:block; padding:15px; margin-top:12px; border-radius:14px; font-weight:700; font-size:18px; text-decoration:none; background:var(--brand); color:#fff; }
+  .v-h a.btn.ghost { background:#eef1f6; color:var(--ink); }
+  .v-h code { background:#f1f3f7; padding:2px 6px; border-radius:6px; font-size:14px; }
+
+/* === เจ้าหน้าที่ === */
+.v-t .center { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+.v-t .card { background:#fff; border:1px solid var(--line); border-radius:16px; padding:24px; box-shadow:0 2px 10px rgba(16,24,40,.05); }
+.v-t h1 { font-size:22px; margin:0 0 4px; }
+.v-t h2 { font-size:18px; margin:0 0 12px; }
+.v-t .mut { color:var(--mut); font-size:14px; }
+.v-t label { display:block; font-weight:600; margin:14px 0 6px; font-size:15px; }
+.v-t input,
+.v-t select { width:100%; font:inherit; font-size:17px; padding:11px 12px; border:1px solid #cfd4dc; border-radius:10px; background:#fff; }
+.v-t input:focus,
+.v-t select:focus { outline:2px solid #bfd3ff; border-color:var(--brand); }
+.v-t .row { display:flex; gap:12px; }
+.v-t .row > * { flex:1; }
+.v-t button { font:inherit; font-weight:600; font-size:16px; padding:11px 18px; border-radius:10px; border:1px solid #cfd4dc; background:#fff; color:var(--ink); cursor:pointer; }
+.v-t button.primary { background:var(--brand); border-color:var(--brand); color:#fff; }
+.v-t button.danger { background:#fff; border-color:#f3b4b4; color:var(--bad); }
+.v-t button:disabled { opacity:.55; cursor:default; }
+.v-t .err { color:var(--bad); font-size:14px; min-height:20px; margin-top:10px; }
+.v-t .gate { width:min(380px,100%); }
+.v-t .start { width:min(520px,100%); }
+.v-t .last { margin-top:16px; padding:12px 14px; background:#f0f7ff; border-radius:10px; font-size:15px; }
+.v-t /* หน้าจอ live */
+  .live { min-height:100vh; display:grid; grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr); gap:20px; padding:20px; }
+@media (max-width:900px){.v-t .live { grid-template-columns:1fr; }}
+.v-t .qrcard { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:20px; transition:box-shadow .3s, border-color .3s; }
+.v-t .qrcard.flash { border-color:var(--ok); box-shadow:0 0 0 6px rgba(22,163,74,.25); }
+.v-t #t-qrbox { width:min(100%, 66vh); aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; background:#fff; }
+.v-t #t-qrbox canvas,
+.v-t #t-qrbox img { width:100% !important; height:100% !important; image-rendering:pixelated; }
+.v-t .bar { width:min(100%, 66vh); height:8px; background:#e8ebf1; border-radius:99px; overflow:hidden; }
+.v-t .bar > i { display:block; height:100%; width:100%; background:var(--brand); transition:width .2s linear; }
+.v-t .bar.low > i { background:var(--warn); }
+.v-t .hint { font-size:18px; font-weight:600; text-align:center; }
+.v-t .side { display:flex; flex-direction:column; gap:16px; }
+.v-t .count { font-size:64px; font-weight:700; line-height:1; }
+.v-t .count small { font-size:26px; color:var(--mut); font-weight:600; }
+.v-t .progress { height:12px; background:#e8ebf1; border-radius:99px; overflow:hidden; margin-top:12px; }
+.v-t .progress > i { display:block; height:100%; background:var(--ok); width:0; transition:width .4s; }
+.v-t ul.recent { list-style:none; margin:0; padding:0; }
+.v-t ul.recent li { display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); font-size:17px; }
+.v-t ul.recent li:first-child { font-weight:700; }
+.v-t .tag { font-size:13px; padding:2px 10px; border-radius:99px; background:#dcfce7; color:#166534; white-space:nowrap; }
+.v-t .tag.late { background:#fef3c7; color:#92400e; }
+.v-t .acts { display:flex; gap:10px; flex-wrap:wrap; }
+.v-t .net { position:fixed; right:14px; bottom:12px; font-size:13px; color:var(--bad); }
+.v-t .modal { position:fixed; inset:0; background:rgba(16,24,40,.45); display:flex; align-items:center; justify-content:center; padding:20px; z-index:10; }
+.v-t .modal .card { width:min(420px,100%); }
+/* === นักเรียน/ตัวแทน === */
+.v-s .wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px; }
+.v-s .card { width:min(460px,100%); background:#fff; border-radius:20px; padding:24px 20px; box-shadow:0 4px 18px rgba(16,24,40,.08); text-align:center; }
+.v-s h1 { font-size:21px; margin:0 0 4px; }
+.v-s .mut { color:var(--mut); font-size:15px; }
+.v-s input[type=text] { width:100%; font:inherit; font-size:18px; padding:13px; border:2px solid #cfd4dc; border-radius:14px; margin-top:14px; }
+.v-s input[type=text]:focus { outline:none; border-color:var(--brand); }
+.v-s button { width:100%; font:inherit; font-weight:700; font-size:19px; padding:15px; border-radius:14px; border:0; margin-top:14px; background:var(--brand); color:#fff; }
+.v-s button.ghost { background:#eef1f6; color:var(--ink); font-weight:600; }
+.v-s button:disabled { opacity:.55; }
+.v-s .err { color:var(--bad); font-size:15px; min-height:22px; margin-top:10px; }
+.v-s .big { font-size:60px; line-height:1; margin-bottom:10px; }
+.v-s .timer { font-size:14px; color:var(--mut); margin-top:14px; }
+.v-s .spin { width:38px; height:38px; border:4px solid #dbe3f5; border-top-color:var(--brand); border-radius:50%; margin:18px auto 0; animation:r .9s linear infinite; }
+@keyframes r{ to { transform:rotate(360deg); } }
+.v-s .list { margin-top:12px; max-height:52vh; overflow:auto; text-align:left; border:1px solid var(--line); border-radius:14px; }
+.v-s .list button { margin:0; border-radius:0; background:#fff; color:var(--ink); text-align:left; font-weight:600; font-size:17px; padding:13px 14px; border-bottom:1px solid var(--line); }
+.v-s .list button:last-child { border-bottom:0; }
+.v-s .list button small { display:block; font-weight:400; color:var(--mut); font-size:13px; }
+.v-s .list .none { padding:18px; text-align:center; color:var(--mut); }
+.v-s .inst { font-size:22px; font-weight:700; margin:4px 0 2px; }
+.v-s .who { display:flex; align-items:center; gap:12px; text-align:left; margin-top:10px; padding:12px 14px; border:2px solid var(--line); border-radius:14px; cursor:pointer; }
+.v-s .who.on { border-color:var(--ok); background:#f0fdf4; }
+.v-s .who input { width:24px; height:24px; margin:0; accent-color:var(--ok); }
+.v-s .who .nm { font-size:18px; font-weight:600; }
+.v-s .who small { display:block; color:var(--mut); font-weight:400; font-size:13px; }
+.v-s .tally { margin-top:12px; font-weight:600; }
+.v-s .badge { display:inline-block; margin-top:10px; padding:6px 18px; border-radius:99px; font-weight:700; font-size:18px; background:#dcfce7; color:#166534; }
+.v-s .badge.late { background:#fef3c7; color:#92400e; }
+/* === ลงทะเบียน === */
+.v-r .wrap { max-width:560px; margin:0 auto; padding:16px; }
+.v-r .card { background:#fff; border-radius:18px; padding:22px 18px; box-shadow:0 4px 18px rgba(16,24,40,.08); margin-bottom:14px; }
+.v-r h1 { font-size:22px; margin:0 0 4px; }
+.v-r h2 { font-size:17px; margin:0 0 6px; }
+.v-r .mut { color:var(--mut); font-size:14px; }
+.v-r label { display:block; font-weight:600; margin:14px 0 6px; font-size:15px; }
+.v-r label .req { color:var(--bad); }
+.v-r input,
+.v-r select { width:100%; font:inherit; font-size:17px; padding:12px; border:1px solid #cfd4dc; border-radius:12px; background:#fff; }
+.v-r input:focus,
+.v-r select:focus { outline:2px solid #bfd3ff; border-color:var(--brand); }
+.v-r .row { display:flex; gap:10px; }
+.v-r .row > * { flex:1; }
+.v-r .stu { display:flex; align-items:center; gap:10px; margin-top:8px; }
+.v-r .stu b { width:22px; color:var(--mut); text-align:center; }
+.v-r button { width:100%; font:inherit; font-weight:700; font-size:19px; padding:15px; border-radius:14px; border:0; margin-top:18px; background:var(--brand); color:#fff; }
+.v-r button:disabled { opacity:.55; }
+.v-r .err { color:var(--bad); font-size:15px; min-height:22px; margin-top:12px; }
+.v-r .hp { position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
+.v-r .center { text-align:center; }
+.v-r .big { font-size:58px; line-height:1; margin-bottom:8px; }
+.v-r .code { display:inline-block; margin:10px 0; padding:8px 22px; border-radius:12px; background:#eef3ff; color:var(--brand); font-size:30px; font-weight:700; letter-spacing:2px; }
+</style>
+</head>
+<body>
+
+<section id="sec-home" class="v-h" hidden>
+  <div class="card">
+    <h1>ระบบเช็คชื่อ อวท. ระดับภาค</h1>
+    <p>ภาคตะวันออกและกรุงเทพมหานคร</p>
+    <a class="btn" href="?mode=register">ลงทะเบียนสถานศึกษา</a>
+    <a class="btn ghost" href="?mode=teacher">เจ้าหน้าที่ (ต้องใช้ PIN)</a>
+    <p style="margin:18px 0 0;font-size:14px">ตัวแทนสถานศึกษา: เช็คชื่อโดยสแกน QR จากหน้าจอเจ้าหน้าที่</p>
+  </div>
+</section>
+
+<section id="sec-setup" class="v-h" hidden>
+  <div class="card">
+    <h1>ยังไม่ได้ตั้งค่า API</h1>
+    <p>เปิดไฟล์ <code>index.html</code> แล้วนำ API URL จาก Apps Script (เมนู เช็คชื่อ QR ▸ แสดงลิงก์ / API URL) ไปใส่ในตัวแปร <code>API</code> ด้านล่างของไฟล์</p>
+  </div>
+</section>
+
+<section id="sec-register" class="v-r" hidden>
+<div class="wrap">
+
+  <div id="r-vLoad" class="card center"><h1>กำลังโหลด…</h1></div>
+
+  <div id="r-vClosed" class="card center" hidden>
+    <div class="big">🔒</div>
+    <h1>ปิดรับลงทะเบียนแล้ว</h1>
+    <div class="mut">หากต้องการลงทะเบียนหรือแก้ไขข้อมูล กรุณาติดต่อเจ้าหน้าที่</div>
+  </div>
+
+  <form id="r-vForm" class="card" hidden autocomplete="off">
+    <h1>ลงทะเบียนสถานศึกษา</h1>
+    <div class="mut">กิจกรรม อวท. ระดับภาค (ภาคตะวันออกและกรุงเทพฯ) · สถานศึกษาละ 1 แบบฟอร์ม</div>
+
+    <label for="r-name">ชื่อสถานศึกษา <span class="req">*</span></label>
+    <input id="r-name" maxlength="100" placeholder="เช่น วิทยาลัยเทคนิคสัตหีบ">
+
+    <div class="row">
+      <div><label for="r-group">ภาค <span class="req">*</span></label><select id="r-group"><option value="">เลือก…</option></select></div>
+      <div><label for="r-prov">จังหวัด</label><input id="r-prov" maxlength="40" placeholder="เช่น ชลบุรี"></div>
+    </div>
+
+    <h2 style="margin-top:22px">ครูผู้ควบคุม (1 คน)</h2>
+    <label for="r-teacher">ชื่อ-สกุล (รวมคำนำหน้า) <span class="req">*</span></label>
+    <input id="r-teacher" maxlength="80">
+    <label for="r-phone">เบอร์โทรศัพท์ <span class="req">*</span></label>
+    <input id="r-phone" type="tel" inputmode="numeric" maxlength="14" placeholder="08xxxxxxxx">
+
+    <h2 style="margin-top:22px">นักเรียนตัวแทน (ไม่เกิน <span id="r-maxS">5</span> คน)</h2>
+    <div class="mut">ชื่อ-สกุล (รวมคำนำหน้า) อย่างน้อย 1 คน</div>
+    <div id="r-stuBox"></div>
+
+    <input class="hp" id="r-website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <div class="err" id="r-err"></div>
+    <button type="submit" id="r-btn">ส่งลงทะเบียน</button>
+  </form>
+
+  <div id="r-vDone" class="card center" hidden>
+    <div class="big">✅</div>
+    <h1>ลงทะเบียนสำเร็จ</h1>
+    <div id="r-dName" style="font-size:19px;font-weight:600"></div>
+    <div class="mut">รหัสสถานศึกษาของคุณ</div>
+    <div class="code" id="r-dCode"></div>
+    <div class="mut">นำรหัสนี้ติดต่อเจ้าหน้าที่หากต้องแก้ไขข้อมูล · ถ่ายภาพหน้าจอเก็บไว้ได้เลย</div>
+  </div>
+
+</div>
+</section>
+
+<section id="sec-student" class="v-s" hidden>
+<div class="wrap"><div class="card">
+
+  <div id="s-vLoad"><h1>กำลังตรวจสอบ QR…</h1><div class="spin"></div></div>
+
+  <!-- เลือกสถานศึกษา -->
+  <div id="s-vPick" hidden>
+    <h1 id="s-ttl"></h1>
+    <div class="mut" id="s-grp"></div>
+    <input type="text" id="s-q" placeholder="ค้นหาชื่อสถานศึกษา…" autocomplete="off">
+    <div class="list" id="s-list"></div>
+    <div class="err" id="s-pickErr"></div>
+    <div class="timer" id="s-timer1"></div>
+  </div>
+
+  <!-- ระบุจำนวนผู้เข้าร่วม -->
+  <div id="s-vForm" hidden>
+    <div class="mut">เช็คชื่อสถานศึกษา</div>
+    <div class="inst" id="s-fName"></div>
+    <div class="mut" style="margin-top:6px">ติ๊กชื่อผู้ที่มาร่วมกิจกรรมวันนี้ (เอาออกถ้าไม่มา)</div>
+    <div id="s-who"></div>
+    <div class="tally" id="s-tally"></div>
+    <input type="text" id="s-rep" placeholder="ชื่อผู้ลงชื่อ (ไม่บังคับ)" maxlength="60" autocomplete="off">
+    <div class="err" id="s-fErr"></div>
+    <button id="s-btnOk">ยืนยัน เช็คชื่อ</button>
+    <button class="ghost" id="s-btnBack">เปลี่ยนสถานศึกษา</button>
+    <div class="timer" id="s-timer2"></div>
+  </div>
+
+  <div id="s-vDone" hidden>
+    <div class="big">✅</div>
+    <h1>เช็คชื่อสำเร็จ</h1>
+    <div class="inst" id="s-dName"></div>
+    <div class="badge" id="s-dBadge"></div>
+    <div class="mut" id="s-dCount" style="margin-top:12px"></div>
+    <div class="mut" id="s-dTime" style="margin-top:4px"></div>
+    <div class="mut" style="margin-top:10px">ปิดหน้านี้ได้เลย</div>
+  </div>
+
+  <div id="s-vErr" hidden>
+    <div class="big">⚠️</div>
+    <h1 id="s-eMsg" style="font-size:18px;line-height:1.5"></h1>
+  </div>
+
+</div></div>
+</section>
+
+<section id="sec-teacher" class="v-t" hidden>
+<!-- ใส่ PIN -->
+<section id="t-gate" class="center" hidden>
+  <div class="card gate">
+    <h1>เช็คชื่อด้วย QR</h1>
+    <div class="mut">หน้าจอเจ้าหน้าที่ · กิจกรรม อวท. ระดับภาค</div>
+    <label for="t-pin">PIN เจ้าหน้าที่</label>
+    <input id="t-pin" type="password" inputmode="numeric" autocomplete="off">
+    <div class="err" id="t-gateErr"></div>
+    <button class="primary" id="t-gateBtn" style="width:100%;margin-top:6px">เข้าสู่ระบบ</button>
+  </div>
+</section>
+
+<!-- ฟอร์มเริ่มคาบ -->
+<section id="t-start" class="center" hidden>
+  <div class="card start">
+    <h1>เริ่มเช็คชื่อประจำวัน</h1>
+    <div class="mut">เปิดวันละ 1 คาบ · QR จะเปลี่ยนใบใหม่ทุกครั้งที่มีผู้สแกน 1 คน</div>
+    <div id="t-lastBox" class="last" hidden></div>
+    <div id="t-regLink" class="mut" style="margin-top:12px;word-break:break-all;user-select:all"></div>
+    <label for="t-title">ชื่อวัน / กิจกรรม</label>
+    <input id="t-title" placeholder="เช่น อวท. ระดับภาค วันที่ 1">
+    <label for="t-group">ภาค</label>
+    <select id="t-group"><option value="">ทุกสถานศึกษา (ตะวันออกและกรุงเทพฯ)</option></select>
+    <div class="row">
+      <div><label for="t-late">นับว่า "สาย" หลัง (นาที)</label><input id="t-late" type="number" min="0" max="240" value="30"></div>
+      <div><label for="t-ttl">QR หมดอายุเอง (วินาที)</label><input id="t-ttl" type="number" min="10" max="300" value="45"></div>
+    </div>
+    <div class="err" id="t-startErr"></div>
+    <button class="primary" id="t-startBtn" style="width:100%;margin-top:6px">เริ่มเช็คชื่อ</button>
+  </div>
+</section>
+
+<!-- หน้าจอ QR -->
+<section id="t-live" class="live" hidden>
+  <div class="card qrcard" id="t-qrcard">
+    <div class="hint" id="t-liveTitle"></div>
+    <div id="t-qrbox"></div>
+    <div class="bar" id="t-bar"><i id="t-barFill"></i></div>
+    <div class="hint">ตัวแทนสถานศึกษาสแกน แล้วเลือกสถานศึกษาของตน</div>
+  </div>
+  <div class="side">
+    <div class="card">
+      <div class="mut">สถานศึกษาที่เช็คชื่อแล้ว</div>
+      <div class="count"><span id="t-cnt">0</span> <small>/ <span id="t-tot">0</span> แห่ง</small></div>
+      <div class="progress"><i id="t-prog"></i></div>
+      <div id="t-people" style="margin-top:10px;font-weight:600"></div>
+      <div class="mut" id="t-meta" style="margin-top:4px"></div>
+    </div>
+    <div class="card" style="flex:1">
+      <h2>ล่าสุด</h2>
+      <ul class="recent" id="t-recent"></ul>
+    </div>
+    <div class="acts">
+      <button id="t-manualBtn">ยังไม่มา / เช็คแทน</button>
+      <button class="danger" id="t-closeBtn">ปิดวัน / สรุป</button>
+    </div>
+  </div>
+</section>
+
+<div class="modal" id="t-modal" hidden><div class="card" id="t-modalCard"></div></div>
+<div class="net" id="t-net"></div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* ════════ ตั้งค่า: วาง API URL ของ Apps Script (ลงท้าย /exec) ════════ */
+var API = 'https://script.google.com/macros/s/AKfycbyqp0q1oz4Hi6stcNu3gmmnZVq3gMSv3EEm0CX7waCVXlSezBfQPo2G9CaoLDwpgqSN/exec';
+/* ═══════════════════════════════════════════════════════════════════ */
+
+var BASE = location.origin + location.pathname;
+var Q = new URLSearchParams(location.search);
+
+/** เรียกฟังก์ชันฝั่ง Apps Script (POST แบบ text/plain เพื่อไม่ให้เกิด CORS preflight) */
+function call(name) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  var ctl = new AbortController();
+  var tm = setTimeout(function () { ctl.abort(); }, 30000);
+  return fetch(API, { method: 'POST', body: JSON.stringify({ fn: name, args: args }), signal: ctl.signal })
+    .then(function (r) { clearTimeout(tm); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .catch(function (e) { clearTimeout(tm); throw e; });
+}
+
+function initRegister() {
+  var $ = function (id) { return document.getElementById('r-' + id); };
+  function view(id) { ['vLoad', 'vClosed', 'vForm', 'vDone'].forEach(function (v) { $(v).hidden = (v !== id); }); }
+
+  var stuInputs = [];
+  call('api_reg_info').then(function (r) {
+    if (!r.open) return view('vClosed');
+    r.regions.forEach(function (g) { var o = document.createElement('option'); o.value = g; o.textContent = g; $('group').appendChild(o); });
+    $('maxS').textContent = r.maxStudents;
+    for (var i = 1; i <= r.maxStudents; i++) {
+      var w = document.createElement('div'); w.className = 'stu';
+      var b = document.createElement('b'); b.textContent = i;
+      var inp = document.createElement('input'); inp.maxLength = 80; inp.placeholder = 'นักเรียนคนที่ ' + i;
+      w.appendChild(b); w.appendChild(inp); $('stuBox').appendChild(w); stuInputs.push(inp);
+    }
+    view('vForm');
+  }).catch(function () { $('vLoad').innerHTML = '<h1 style="font-size:18px">เชื่อมต่อไม่ได้ กรุณารีเฟรชหน้านี้</h1>'; });
+
+  $('vForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    $('err').textContent = ''; $('btn').disabled = true;
+    var data = {
+      name: $('name').value, group: $('group').value, prov: $('prov').value,
+      teacher: $('teacher').value, phone: $('phone').value, website: $('website').value,
+      students: stuInputs.map(function (i) { return i.value; }),
+    };
+    call('api_register', data).then(function (r) {
+      $('btn').disabled = false;
+      if (!r.ok) { $('err').textContent = r.msg; window.scrollTo(0, document.body.scrollHeight); return; }
+      $('dName').textContent = r.name || data.name;
+      $('dCode').textContent = r.code;
+      view('vDone'); window.scrollTo(0, 0);
+    }).catch(function () { $('btn').disabled = false; $('err').textContent = 'เชื่อมต่อไม่ได้ กรุณากดส่งอีกครั้ง'; });
+  });
+}
+
+function initStudent() {
+  var TOKEN = (Q.get('t') || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 32);
+  var $ = function (id) { return document.getElementById('s-' + id); };
+
+  function rand() {
+    try { var a = new Uint8Array(9); crypto.getRandomValues(a); return Array.prototype.map.call(a, function (b) { return b.toString(36).padStart(2, '0'); }).join(''); }
+    catch (e) { return (Math.random().toString(36) + Math.random().toString(36)).replace(/[^a-z0-9]/g, '').slice(0, 16); }
+  }
+  var DEV;
+  try { DEV = localStorage.getItem('qrdev'); if (!DEV) { DEV = rand(); localStorage.setItem('qrdev', DEV); } }
+  catch (e) { DEV = rand(); }
+
+  function view(id) { ['vLoad', 'vPick', 'vForm', 'vDone', 'vErr'].forEach(function (v) { $(v).hidden = (v !== id); }); }
+  function fail(msg) { $('eMsg').textContent = msg; view('vErr'); stopTimer(); }
+
+  var tick = null, deadline = 0;
+  function startTimer(sec) {
+    deadline = Date.now() + sec * 1000;
+    clearInterval(tick);
+    tick = setInterval(function () {
+      var left = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+      var t = 'กรุณาเช็คชื่อให้เสร็จภายใน ' + Math.floor(left / 60) + ':' + ('0' + (left % 60)).slice(-2) + ' นาที';
+      $('timer1').textContent = t; $('timer2').textContent = t;
+      if (left <= 0) fail('หมดเวลา กรุณาสแกน QR ใหม่จากหน้าจอ');
+    }, 500);
+  }
+  function stopTimer() { clearInterval(tick); }
+
+  var cur = null, items = [], slots = [];
+
+  /* 1) สแกนมาถึง → จองสิทธิ์ QR ใบนี้ (QR บนจอจะเปลี่ยนใบใหม่ทันที) */
+  call('api_claim', TOKEN, DEV).then(function (r) {
+    if (!r.ok) return fail(r.msg);
+    $('ttl').textContent = r.title;
+    $('grp').textContent = r.group ? 'ภาค' + r.group : '';
+    startTimer(r.claimSec);
+    loadList();
+  }).catch(function () { fail('เชื่อมต่อไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วสแกนใหม่'); });
+
+  /* 2) เลือกสถานศึกษา */
+  function loadList(msg) {
+    call('api_list', TOKEN, DEV).then(function (r) {
+      if (r.fatal) return fail(r.msg);
+      items = r.list || [];
+      $('pickErr').textContent = msg || '';
+      renderList(); view('vPick');
+    }).catch(function () { fail('เชื่อมต่อไม่ได้ กรุณาสแกนใหม่'); });
+  }
+  function renderList() {
+    var q = $('q').value.trim().toLowerCase(), box = $('list');
+    box.innerHTML = '';
+    var shown = items.filter(function (i) { return !q || (i.name + ' ' + i.prov).toLowerCase().indexOf(q) >= 0; });
+    if (!shown.length) {
+      var d = document.createElement('div'); d.className = 'none';
+      d.textContent = items.length ? 'ไม่พบสถานศึกษาที่ค้นหา' : 'ทุกสถานศึกษาเช็คชื่อครบแล้ว';
+      box.appendChild(d); return;
+    }
+    shown.forEach(function (i) {
+      var b = document.createElement('button'); b.textContent = i.name;
+      if (i.prov) { var s = document.createElement('small'); s.textContent = i.prov; b.appendChild(s); }
+      b.onclick = function () { pick(i); };
+      box.appendChild(b);
+    });
+  }
+  $('q').addEventListener('input', renderList);
+
+  /* 3) ติ๊กผู้ที่มา → ยืนยัน */
+  function updateTally() {
+    var boxes = $('who').querySelectorAll('input'), n = 0;
+    Array.prototype.forEach.call(boxes, function (b) { b.parentNode.classList.toggle('on', b.checked); if (b.checked) n++; });
+    $('tally').textContent = 'มาแล้ว ' + n + ' จาก ' + boxes.length + ' คน';
+  }
+  function pick(i) {
+    $('fErr').textContent = '';
+    call('api_people', TOKEN, DEV, i.id).then(function (r) {
+      if (r.fatal) return fail(r.msg);
+      if (!r.ok) return loadList(r.msg);
+      cur = i; slots = r.slots; $('fName').textContent = r.name;
+      var box = $('who'); box.innerHTML = '';
+      slots.forEach(function (s) {
+        var l = document.createElement('label'); l.className = 'who on';
+        var c = document.createElement('input'); c.type = 'checkbox'; c.checked = true; c.value = s.i;
+        c.onchange = updateTally;
+        var d = document.createElement('div'); d.className = 'nm'; d.textContent = s.label;
+        var sm = document.createElement('small'); sm.textContent = s.role; d.appendChild(sm);
+        l.appendChild(c); l.appendChild(d); box.appendChild(l);
+      });
+      updateTally(); view('vForm');
+    }).catch(function () { $('pickErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่'; });
+  }
+  $('btnBack').onclick = function () { view('vPick'); };
+
+  $('btnOk').onclick = function () {
+    $('btnOk').disabled = true; $('fErr').textContent = '';
+    call('api_submit', TOKEN, DEV, cur.id, Array.prototype.filter.call($('who').querySelectorAll('input'), function (b) { return b.checked; }).map(function (b) { return Number(b.value); }), $('rep').value).then(function (r) {
+      $('btnOk').disabled = false;
+      if (r.fatal) return fail(r.msg);
+      if (!r.ok) {
+        if (r.dup) return loadList(r.msg);
+        $('fErr').textContent = r.msg; return;
+      }
+      stopTimer();
+      $('dName').textContent = r.name;
+      $('dBadge').textContent = r.status;
+      $('dBadge').className = 'badge' + (r.status === 'สาย' ? ' late' : '');
+      $('dCount').textContent = 'นักเรียน ' + r.students + ' คน · ครู ' + r.teachers + ' คน';
+      $('dTime').textContent = 'เวลา ' + r.time + ' น.';
+      view('vDone');
+    }).catch(function () { $('btnOk').disabled = false; $('fErr').textContent = 'เชื่อมต่อไม่ได้ ลองกดอีกครั้ง'; });
+  };
+}
+
+function initTeacher() {
+  var $ = function (id) { return document.getElementById('t-' + id); };
+  var PIN = '';
+  try { PIN = sessionStorage.getItem('qrpin') || ''; } catch (e) {}
+
+  function show(id) { ['gate', 'start', 'live'].forEach(function (s) { $(s).hidden = (s !== id); }); }
+
+  /* ── PIN ── */
+  function savePin(p) { PIN = p; try { sessionStorage.setItem('qrpin', p); } catch (e) {} }
+  $('gateBtn').onclick = function () {
+    var p = $('pin').value.trim();
+    if (!p) return;
+    $('gateBtn').disabled = true;
+    call('api_state', p).then(function (s) {
+      $('gateBtn').disabled = false;
+      if (!s.ok) { $('gateErr').textContent = s.msg || 'PIN ไม่ถูกต้อง'; return; }
+      savePin(p); $('gateErr').textContent = ''; loop(s);
+    }).catch(function () { $('gateBtn').disabled = false; $('gateErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่'; });
+  };
+  $('pin').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('gateBtn').click(); });
+
+  /* ── polling ── */
+  var timer = null, mode = '', polling = false;
+  function loop(first) {
+    if (first) render(first);
+    schedule();
+  }
+  function schedule() {
+    clearTimeout(timer);
+    timer = setTimeout(poll, mode === 'live' ? 1200 : 4000);
+  }
+  function poll() {
+    if (!PIN || polling) return schedule();
+    polling = true;
+    call('api_state', PIN).then(function (s) {
+      polling = false; $('net').textContent = '';
+      if (!s.ok) { savePin(''); mode = ''; show('gate'); return; }
+      render(s); schedule();
+    }).catch(function () { polling = false; $('net').textContent = 'เชื่อมต่อไม่ได้ กำลังลองใหม่…'; schedule(); });
+  }
+
+  /* ── render ── */
+  var curToken = null, lastCount = -1, qr = null, qrSize = 0, base = 0, ttlMs = 45000;
+
+  function render(s) {
+    if (!s.active) {
+      if (mode !== 'start') { mode = 'start'; show('start'); prepStart(s); }
+      return;
+    }
+    if (mode !== 'live') { mode = 'live'; show('live'); curToken = null; lastCount = -1; qr = null; $('qrbox').innerHTML = ''; }
+
+    $('liveTitle').textContent = s.title + (s.group ? ' · ' + s.group : '');
+    $('cnt').textContent = s.count; $('tot').textContent = s.total;
+    $('people').textContent = 'นักเรียน ' + s.stu + ' คน · ครู ' + s.tea + ' คน';
+    $('prog').style.width = Math.min(100, s.total ? s.count / s.total * 100 : 0) + '%';
+    $('meta').textContent = 'เริ่ม ' + new Date(s.startedAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) +
+      ' น. · สายหลัง ' + s.lateAfterMin + ' นาที';
+
+    ttlMs = s.ttlSec * 1000;
+    base = performance.now() - (s.serverNow - s.issuedAt);
+    if (s.token !== curToken) { curToken = s.token; drawQR(BASE + '?t=' + s.token); }
+
+    if (lastCount >= 0 && s.count > lastCount) flash();
+    lastCount = s.count;
+
+    var ul = $('recent'); ul.innerHTML = '';
+    s.recent.forEach(function (r) {
+      var li = document.createElement('li');
+      var n = document.createElement('span'); n.textContent = r.n;
+      var t = document.createElement('span'); t.className = 'tag' + (r.s === 'สาย' ? ' late' : ''); t.textContent = r.s + ' ' + r.p + ' · ' + r.t.slice(0, 5);
+      li.appendChild(n); li.appendChild(t); ul.appendChild(li);
+    });
+  }
+
+  function drawQR(url) {
+    var box = $('qrbox');
+    var size = Math.max(180, Math.floor(box.clientWidth || 300));
+    if (!qr || size !== qrSize) {
+      box.innerHTML = '';
+      qr = new QRCode(box, { text: url, width: size, height: size, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+      qrSize = size;
+    } else { qr.clear(); qr.makeCode(url); }
+  }
+  window.addEventListener('resize', function () { qr = null; });
+
+  function flash() {
+    var c = $('qrcard'); c.classList.add('flash');
+    setTimeout(function () { c.classList.remove('flash'); }, 700);
+  }
+
+  setInterval(function () {      // แถบนับถอยหลังอายุ QR
+    if (mode !== 'live') return;
+    var rem = Math.max(0, ttlMs - (performance.now() - base));
+    var pct = rem / ttlMs * 100;
+    $('barFill').style.width = pct + '%';
+    $('bar').classList.toggle('low', pct < 25);
+  }, 200);
+
+  /* ── เริ่มคาบ ── */
+  function prepStart(s) {
+    var b = $('lastBox');
+    if (s.last) {
+      b.hidden = false;
+      b.textContent = 'ล่าสุด "' + s.last.title + '" ปิดแล้ว — มา ' + s.last.present + ' · สาย ' + s.last.late + ' · ขาด ' + s.last.absent + ' แห่ง';
+    } else b.hidden = true;
+    call('api_groups', PIN).then(function (g) {
+      if (!g.ok) return;
+      var sel = $('group'), keep = sel.value;
+      sel.length = 1;
+      sel.options[0].textContent = 'ทุกสถานศึกษา (' + g.total + ' แห่ง)';
+      g.groups.forEach(function (x) { var o = document.createElement('option'); o.value = x; o.textContent = x + ' (' + g.counts[x] + ' แห่ง)'; sel.appendChild(o); });
+      sel.value = keep;
+      var rl = $('regLink');
+      rl.textContent = 'ลิงก์ลงทะเบียน (' + (g.regOpen ? 'เปิดรับ' : 'ปิดรับ') + '): ' + BASE + '?mode=register';
+    });
+    try { var t = localStorage.getItem('qrtitle'); if (t && !$('title').value) $('title').value = t; } catch (e) {}
+  }
+  $('startBtn').onclick = function () {
+    $('startBtn').disabled = true; $('startErr').textContent = '';
+    var p = { title: $('title').value, group: $('group').value, lateAfterMin: $('late').value, ttlSec: $('ttl').value };
+    try { localStorage.setItem('qrtitle', p.title); } catch (e) {}
+    call('api_start', PIN, p).then(function (r) {
+      $('startBtn').disabled = false;
+      if (!r.ok) { $('startErr').textContent = r.msg; return; }
+      mode = ''; poll();
+    }).catch(function () { $('startBtn').disabled = false; $('startErr').textContent = 'เชื่อมต่อไม่ได้ ลองใหม่'; });
+  };
+
+  /* ── modal: เพิ่มชื่อเอง / ปิดคาบ ── */
+  function openModal(build) { var c = $('modalCard'); c.innerHTML = ''; build(c); $('modal').hidden = false; }
+  function closeModal() { $('modal').hidden = true; }
+  function el(tag, props, text) { var e = document.createElement(tag); Object.assign(e, props || {}); if (text) e.textContent = text; return e; }
+
+  $('manualBtn').onclick = openPending;
+  function openPending() {
+    call('api_pending', PIN).then(function (r) {
+      if (!r.ok) return;
+      openModal(function (c) {
+        c.appendChild(el('h2', {}, 'ยังไม่ได้เช็คชื่อ ' + r.list.length + ' แห่ง'));
+        var box = el('div', { style: 'max-height:34vh;overflow:auto;border:1px solid #e4e7ec;border-radius:10px;padding:6px 12px;font-size:15px;margin-bottom:12px' });
+        if (!r.list.length) box.appendChild(el('div', { className: 'mut' }, 'เช็คชื่อครบทุกแห่งแล้ว'));
+        r.list.forEach(function (i) { box.appendChild(el('div', { style: 'padding:3px 0' }, i.name + (i.prov ? ' (' + i.prov + ')' : ''))); });
+        c.appendChild(box);
+        if (r.list.length) {
+          c.appendChild(el('label', {}, 'เช็คชื่อแทนสถานศึกษา'));
+          var sel = el('select');
+          r.list.forEach(function (i) { var o = el('option', { value: i.id }, i.name); sel.appendChild(o); });
+          var row = el('div', { className: 'row' });
+          var ns = el('input', { type: 'number', min: 0, max: r.maxS, value: r.maxS });
+          var nt = el('input', { type: 'number', min: 0, max: r.maxT, value: r.maxT });
+          var w1 = el('div'); w1.appendChild(el('label', {}, 'นักเรียน (คน)')); w1.appendChild(ns);
+          var w2 = el('div'); w2.appendChild(el('label', {}, 'ครู (คน)')); w2.appendChild(nt);
+          row.appendChild(w1); row.appendChild(w2);
+          var msg = el('div', { className: 'err' });
+          var ok = el('button', { className: 'primary' }, 'บันทึก');
+          c.appendChild(sel); c.appendChild(row); c.appendChild(msg);
+          ok.onclick = function () {
+            ok.disabled = true;
+            call('api_manual', PIN, sel.value, ns.value, nt.value).then(function (x) {
+              ok.disabled = false;
+              if (!x.ok) { msg.textContent = x.msg; return; }
+              poll(); openPending();
+            }).catch(function () { ok.disabled = false; msg.textContent = 'เชื่อมต่อไม่ได้'; });
+          };
+          var acts = el('div', { className: 'acts', style: 'margin-top:10px' });
+          var no = el('button', {}, 'ปิด'); no.onclick = closeModal;
+          acts.appendChild(ok); acts.appendChild(no); c.appendChild(acts);
+        } else {
+          var no2 = el('button', {}, 'ปิด'); no2.onclick = closeModal; c.appendChild(no2);
+        }
+      });
+    });
+  }
+
+  $('closeBtn').onclick = function () {
+    openModal(function (c) {
+      var ok = el('button', { className: 'danger' }, 'ปิดวัน');
+      var no = el('button', {}, 'ยกเลิก');
+      c.appendChild(el('h2', {}, 'ปิดวันนี้และสรุป?'));
+      c.appendChild(el('p', { className: 'mut' }, 'สถานศึกษาที่ยังไม่ได้เช็คชื่อจะถูกบันทึกเป็น "ขาด" ลงในชีต และอัปเดตตารางสรุป'));
+      var acts = el('div', { className: 'acts' }); acts.appendChild(ok); acts.appendChild(no); c.appendChild(acts);
+      no.onclick = closeModal;
+      ok.onclick = function () {
+        ok.disabled = true;
+        call('api_close', PIN).then(function () { closeModal(); mode = ''; poll(); })
+          .catch(function () { ok.disabled = false; });
+      };
+    });
+  };
+
+  /* ── เริ่มต้น ── */
+  if (PIN) { poll(); } else { show('gate'); }
+}
+
+/* ── router ── */
+(function () {
+  var route = Q.get('t') ? 'student' : (Q.get('mode') === 'register' ? 'register' : (Q.get('mode') === 'teacher' ? 'teacher' : 'home'));
+  var show = function (id) { document.getElementById('sec-' + id).hidden = false; };
+  if (API.indexOf('PASTE_') === 0 && route !== 'home') return show('setup');
+  var titles = { student: 'เช็คชื่อ', register: 'ลงทะเบียนสถานศึกษา', teacher: 'เจ้าหน้าที่ · เช็คชื่อ อวท.', home: 'เช็คชื่อ อวท. ระดับภาค' };
+  document.title = titles[route];
+  show(route);
+  if (route === 'student') initStudent();
+  else if (route === 'register') initRegister();
+  else if (route === 'teacher') initTeacher();
+})();
+</script>
+</body>
+</html>
