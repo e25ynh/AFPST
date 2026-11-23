@@ -6,10 +6,20 @@
 <title>เช็คชื่อ อวท. ระดับภาค</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root { --ink:#1b2430; --mut:#667085; --line:#e4e7ec; --bg:#f4f6fa; --brand:#1d4ed8; --ok:#16a34a; --warn:#d97706; --bad:#dc2626; }
+  /* โทนสี: เปลี่ยนที่ตัวแปร THEME ท้ายไฟล์ (navy / green / orange) หรือทดลองดูด้วย ?theme=green ต่อท้ายลิงก์ */
+  :root { --ink:#1b2430; --mut:#667085; --line:#e4e7ec; --bg:#f3f5fb; --brand:#1e3a8a; --accent:#d4a017; --soft:#e9eefb; --ring:#b9c8f0; --ok:#16a34a; --warn:#d97706; --bad:#dc2626; }
+  [data-theme="green"]  { --bg:#f1f7f3; --brand:#14653a; --accent:#d4a017; --soft:#e4f3ea; --ring:#b3dcc2; }
+  [data-theme="orange"] { --bg:#fbf4ee; --brand:#c2410c; --accent:#1f2937; --soft:#fdebdd; --ring:#f5c4a1; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:'Sarabun','Noto Sans Thai',system-ui,sans-serif; color:var(--ink); background:var(--bg); }
   [hidden] { display:none !important; }
+
+  /* ลวดลาย: ขนมเปียกปูน + ดอกจอก ลงสีตามโทน (ใช้เป็น mask) */
+  body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; background:var(--brand); opacity:.07;
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2784%27%20height=%2784%27%20viewBox=%270%200%2084%2084%27%3E%3Cpath%20d=%27M42%200L84%2042L42%2084L0%2042Z%27%20fill=%27none%27%20stroke=%27black%27%20stroke-width=%271%27/%3E%3Cg%20transform=%27translate%2842%2042%29%27%3E%3Cellipse%20rx=%273.2%27%20ry=%279%27%20cy=%27-10%27/%3E%3Cellipse%20rx=%273.2%27%20ry=%279%27%20cy=%27-10%27%20transform=%27rotate%2890%29%27/%3E%3Cellipse%20rx=%273.2%27%20ry=%279%27%20cy=%27-10%27%20transform=%27rotate%28180%29%27/%3E%3Cellipse%20rx=%273.2%27%20ry=%279%27%20cy=%27-10%27%20transform=%27rotate%28270%29%27/%3E%3Ccircle%20r=%273%27/%3E%3C/g%3E%3Ccircle%20cx=%270%27%20cy=%270%27%20r=%272.4%27/%3E%3Ccircle%20cx=%2784%27%20cy=%270%27%20r=%272.4%27/%3E%3Ccircle%20cx=%270%27%20cy=%2784%27%20r=%272.4%27/%3E%3Ccircle%20cx=%2784%27%20cy=%2784%27%20r=%272.4%27/%3E%3C/svg%3E"); mask-image:url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2784%27%20height=%2784%27%20viewBox=%270%200%2084%2084%27%3E%3Cpath%20d=%27M42%200L84%2042L42%2084L0%2042Z%27%20fill=%27none%27%20stroke=%27black%27%20stroke-width=%271%27/%3E%3Cg%20transform=%27translate%2842%2042%29%27%3E%3Cellipse%20rx=%273.2%27%20ry=%279%27%20cy=%27-10%27/%3E%3Cellipse%20rx=%273.2%27%20ry=%279%27%20cy=%27-10%27%20transform=%27rotate%2890%29%27/%3E%3Cellipse%20rx=%273.2%27%20ry=%279%27%20cy=%27-10%27%20transform=%27rotate%28180%29%27/%3E%3Cellipse%20rx=%273.2%27%20ry=%279%27%20cy=%27-10%27%20transform=%27rotate%28270%29%27/%3E%3Ccircle%20r=%273%27/%3E%3C/g%3E%3Ccircle%20cx=%270%27%20cy=%270%27%20r=%272.4%27/%3E%3Ccircle%20cx=%2784%27%20cy=%270%27%20r=%272.4%27/%3E%3Ccircle%20cx=%270%27%20cy=%2784%27%20r=%272.4%27/%3E%3Ccircle%20cx=%2784%27%20cy=%2784%27%20r=%272.4%27/%3E%3C/svg%3E");
+    -webkit-mask-size:84px 84px; mask-size:84px 84px; }
+  /* แถบสีทองบนการ์ดทุกใบ */
+  .v-h .card, .v-s .card, .v-r .card, .v-t .card { border-top:5px solid var(--accent); }
 
   /* หน้าแรก / ตั้งค่าไม่ครบ */
   .v-h { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
@@ -29,7 +39,7 @@
 .v-t input,
 .v-t select { width:100%; font:inherit; font-size:17px; padding:11px 12px; border:1px solid #cfd4dc; border-radius:10px; background:#fff; }
 .v-t input:focus,
-.v-t select:focus { outline:2px solid #bfd3ff; border-color:var(--brand); }
+.v-t select:focus { outline:2px solid var(--ring); border-color:var(--brand); }
 .v-t .row { display:flex; gap:12px; }
 .v-t .row > * { flex:1; }
 .v-t button { font:inherit; font-weight:600; font-size:16px; padding:11px 18px; border-radius:10px; border:1px solid #cfd4dc; background:#fff; color:var(--ink); cursor:pointer; }
@@ -39,7 +49,7 @@
 .v-t .err { color:var(--bad); font-size:14px; min-height:20px; margin-top:10px; }
 .v-t .gate { width:min(380px,100%); }
 .v-t .start { width:min(520px,100%); }
-.v-t .last { margin-top:16px; padding:12px 14px; background:#f0f7ff; border-radius:10px; font-size:15px; }
+.v-t .last { margin-top:16px; padding:12px 14px; background:var(--soft); border-radius:10px; font-size:15px; }
 .v-t /* หน้าจอ live */
   .live { min-height:100vh; display:grid; grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr); gap:20px; padding:20px; }
 @media (max-width:900px){.v-t .live { grid-template-columns:1fr; }}
@@ -79,7 +89,7 @@
 .v-s .err { color:var(--bad); font-size:15px; min-height:22px; margin-top:10px; }
 .v-s .big { font-size:60px; line-height:1; margin-bottom:10px; }
 .v-s .timer { font-size:14px; color:var(--mut); margin-top:14px; }
-.v-s .spin { width:38px; height:38px; border:4px solid #dbe3f5; border-top-color:var(--brand); border-radius:50%; margin:18px auto 0; animation:r .9s linear infinite; }
+.v-s .spin { width:38px; height:38px; border:4px solid var(--soft); border-top-color:var(--brand); border-radius:50%; margin:18px auto 0; animation:r .9s linear infinite; }
 @keyframes r{ to { transform:rotate(360deg); } }
 .v-s .list { margin-top:12px; max-height:52vh; overflow:auto; text-align:left; border:1px solid var(--line); border-radius:14px; }
 .v-s .list button { margin:0; border-radius:0; background:#fff; color:var(--ink); text-align:left; font-weight:600; font-size:17px; padding:13px 14px; border-bottom:1px solid var(--line); }
@@ -106,7 +116,7 @@
 .v-r input,
 .v-r select { width:100%; font:inherit; font-size:17px; padding:12px; border:1px solid #cfd4dc; border-radius:12px; background:#fff; }
 .v-r input:focus,
-.v-r select:focus { outline:2px solid #bfd3ff; border-color:var(--brand); }
+.v-r select:focus { outline:2px solid var(--ring); border-color:var(--brand); }
 .v-r .row { display:flex; gap:10px; }
 .v-r .row > * { flex:1; }
 .v-r .stu { display:flex; align-items:center; gap:10px; margin-top:8px; }
@@ -117,7 +127,7 @@
 .v-r .hp { position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
 .v-r .center { text-align:center; }
 .v-r .big { font-size:58px; line-height:1; margin-bottom:8px; }
-.v-r .code { display:inline-block; margin:10px 0; padding:8px 22px; border-radius:12px; background:#eef3ff; color:var(--brand); font-size:30px; font-weight:700; letter-spacing:2px; }
+.v-r .code { display:inline-block; margin:10px 0; padding:8px 22px; border-radius:12px; background:var(--soft); color:var(--brand); font-size:30px; font-weight:700; letter-spacing:2px; }
 </style>
 </head>
 <body>
@@ -303,6 +313,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 /* ════════ ตั้งค่า: วาง API URL ของ Apps Script (ลงท้าย /exec) ════════ */
+var THEME = 'navy';   // navy (น้ำเงิน-ทอง) | green (เขียว-ทอง) | orange (ส้ม-ดำ)
 var API = 'https://script.google.com/macros/s/AKfycbyqp0q1oz4Hi6stcNu3gmmnZVq3gMSv3EEm0CX7waCVXlSezBfQPo2G9CaoLDwpgqSN/exec';
 /* ═══════════════════════════════════════════════════════════════════ */
 
@@ -667,6 +678,8 @@ function initTeacher() {
   var show = function (id) { document.getElementById('sec-' + id).hidden = false; };
   if (API.indexOf('PASTE_') === 0 && route !== 'home') return show('setup');
   var titles = { student: 'เช็คชื่อ', register: 'ลงทะเบียนสถานศึกษา', teacher: 'เจ้าหน้าที่ · เช็คชื่อ อวท.', home: 'เช็คชื่อ อวท. ระดับภาค' };
+  var th = Q.get('theme') || THEME;
+  document.documentElement.setAttribute('data-theme', ['navy', 'green', 'orange'].indexOf(th) >= 0 ? th : 'navy');
   document.title = titles[route];
   show(route);
   if (route === 'student') initStudent();
